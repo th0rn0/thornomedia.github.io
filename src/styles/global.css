@@ -4,7 +4,7 @@
 @font-face {
   font-family: 'Archivo Exp';
   font-style: normal;
-  font-weight: 500 800;
+  font-weight: 100 900;
   font-stretch: 125%;
   font-display: swap;
   src: url('/fonts/archivo-expanded.woff2') format('woff2');
@@ -72,6 +72,7 @@
   --duration-signature: 1100ms;
 
   --max-width: 1180px;
+  --nav-height: 68px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

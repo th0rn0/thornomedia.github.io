@@ -4,7 +4,7 @@
 <footer id="contact">
   <div class="wrap foot-row">
     <div>
-      <div class="logotype">THORNO<span class="dot">.</span>MEDIA</div>
+      <div class="logotype"><span class="brand">THORNO</span><span class="dot">.</span><span class="suffix">MEDIA</span></div>
       <p class="foot-note">Based in the UK — available worldwide.</p>
     </div>
     <div class="foot-links">
@@ -32,11 +32,12 @@
   }
   .logotype {
     font-family: 'Archivo Exp', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 0.02em;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
   }
-  .logotype .dot { color: var(--accent); }
+  .logotype .brand { font-weight: 800; }
+  .logotype .suffix { font-weight: 400; }
+  .logotype .dot { color: var(--accent); font-weight: 400; }
   .foot-note {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
