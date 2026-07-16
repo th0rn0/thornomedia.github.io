@@ -1,9 +1,13 @@
 ---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-white.png';
 ---
 
 <nav class="top">
   <div class="wrap row">
-    <a class="logotype" href="/">THORNO<span class="dot">.</span>MEDIA</a>
+    <a class="logotype" href="/">
+      <Image src={logo} alt="thorno.media" height={20} />
+    </a>
     <div class="navlinks">
       <a href="/#work">Work</a>
       <a href="/#contact">Contact</a>
@@ -27,13 +31,15 @@
     height: 68px;
   }
   .logotype {
-    font-family: 'Archivo Exp', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
   }
-  .logotype .dot { color: var(--accent); }
+  .logotype :global(img) {
+    display: block;
+    height: 20px;
+    width: auto;
+  }
   .navlinks { display: flex; align-items: center; gap: 28px; font-size: 0.88rem; }
   .navlinks a { text-decoration: none; color: var(--text-muted); transition: color 0.15s ease; }
   .navlinks a:hover, .navlinks a:focus-visible { color: var(--text); }
