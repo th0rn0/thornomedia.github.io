@@ -34,20 +34,14 @@
   - Eyebrow/mono caption: 0.7–0.72rem, letter-spacing 0.08–0.14em, uppercase
 
 ## Color
-- **Approach:** Restrained, one accent, everything else neutral.
-- **Dark (default/primary mode):**
+- **Approach:** Restrained, one accent, everything else neutral. Dark-only, by choice, not an omission, the "matte graphite control room" mood is the brand, so there is no light theme or toggle to dilute it.
   - Background `#0B0D0F` (graphite, not true black)
   - Surface `#15181B`, Surface-2 `#1C2024`
   - Text `#ECEEEF`, Muted text `#7C848A`
   - Accent `#E0993D` (brass/instrument amber), Accent-ink `#1A1206`
   - Border `rgba(236,238,239,0.11)`, Border-strong `rgba(236,238,239,0.22)`
-- **Light (secondary "paper/manual" mode, not a naive invert):**
-  - Background `#F1EEE8`, Surface `#E6E1D7`, Surface-2 `#DBD5C8`
-  - Text `#14171A`, Muted text `#676D6F`
-  - Accent `#B9701F` (deepened for contrast on paper), Accent-ink `#FFF8EC`
-  - Border `rgba(20,23,26,0.14)`, Border-strong `rgba(20,23,26,0.26)`
-- **Semantic** (distinct hues from the brass accent, caution-light logic): Success `#5CA974`/`#3D7A52`, Warning `#D1A23A`/`#96731E`, Error `#C1503F`/`#9C3F31`, Info `#5B8AA6`/`#3E6E85` (dark/light).
-- **Dark mode strategy:** Dark is the primary, intended mode for this brand. Light is a fully redesigned "paper" surface, not an inversion, with a deepened accent for contrast. Implement via CSS custom properties on `:root`, override under `@media (prefers-color-scheme)` and `:root[data-theme]` (both directions must win depending on which is stamped).
+- **Semantic:** Success `#5CA974`, Warning `#D1A23A`, Error `#C1503F`, Info `#5B8AA6`.
+- **Implementation:** CSS custom properties on `:root`, `color-scheme: dark` set globally (including via `<meta name="color-scheme" content="dark">`) so browser chrome/form controls also render dark, no `prefers-color-scheme` override and no theme toggle.
 
 ## Spacing
 - **Base unit:** 8px.
@@ -77,3 +71,4 @@
 | 2026-07-16 | Free font stack (Archivo/Instrument Sans/IBM Plex Mono) over paid (PP Neue Corp/Suisse Int'l/Berkeley Mono) | Zero license cost, same role structure; paid stack documented as an optional upgrade path. |
 | 2026-07-16 | Removed decorative grain overlay from design preview | `mix-blend-mode: overlay` on a fixed full-page noise layer crushed contrast badly in dark mode (confirmed via rendered screenshot, not just computed styles). Removed rather than tuned, given the risk of the effect misbehaving in the eventual production build. |
 | 2026-07-16 | Design system approved via HTML preview | User reviewed the local preview file and approved the direction as-is. |
+| 2026-07-16 | Dropped the light theme and toggle, dark-only | User's call after seeing the live site. The aesthetic is a dark, restrained "control room" mood by design, a light variant diluted that and added UI surface for no real benefit. |
