@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectTile from './ProjectTile.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { projects } = Astro.props;
+---
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Selected work</h2>
+      <span class="count mono">{String(projects.length).padStart(2, '0')} PROJECTS — MIXED FORMAT</span>
+    </div>
+    <div class="grid-work">
+      {projects.map((project) => <ProjectTile project={project} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  section { padding: 96px 0; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 44px;
+    flex-wrap: wrap;
+  }
+  .section-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+  .count { font-size: 0.8rem; color: var(--text-muted); }
+  .grid-work {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px;
+  }
+</style>

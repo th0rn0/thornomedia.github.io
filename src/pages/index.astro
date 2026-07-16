@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const heroProject = projects.find((p) => p.data.featured) ?? projects[0];
+---
+
+<BaseLayout title="thorno.media — Photography, Videography, FPV">
+  <Hero
+    eyebrow="PILOT · PHOTOGRAPHER · DIRECTOR"
+    subtitle="Aerial and ground-based work across photography, film, and FPV, flown, framed, and cut by one hand. Every project below carries the data behind the shot: not a claim, a record."
+    image={heroProject.data.cover}
+    imageAlt={heroProject.data.title}
+    primaryCta={{ label: 'View the work', href: '#work' }}
+    secondaryCta={{ label: 'Get in touch', href: '#contact' }}
+  >
+    Precision in motion,<br />and in stillness.
+  </Hero>
+  <ProjectGrid projects={projects} />
+</BaseLayout>

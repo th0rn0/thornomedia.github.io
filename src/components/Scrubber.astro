@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { gallery, video } = project.data;
+
+// Segment markers reflect real content order: cover, then each gallery
+// image, then the video if present. Presentational only for now, not a
+// real seek control, there's no interleaved media player yet to scrub.
+const segments = ['Cover', ...gallery.map((_, i) => `Photo ${i + 1}`), ...(video ? ['Video'] : [])];
+const marks = segments.map((label, i) => ({
+  label,
+  position: segments.length > 1 ? (i / (segments.length - 1)) * 100 : 0,
+}));
+---
+
+<div class="scrubber">
+  <div class="scrubber-track">
+    <div class="scrubber-fill"></div>
+    {marks.slice(1, -1).map((m) => <div class="scrubber-seg" style={`left: ${m.position}%`} />)}
+  </div>
+  <div class="scrubber-marks mono">
+    {marks.map((m) => <span>{m.label}</span>)}
+  </div>
+</div>
+
+<style>
+  .scrubber { padding: 22px 24px 26px; }
+  .scrubber-track {
+    position: relative;
+    height: 5px;
+    background: var(--surface-2);
+    border-radius: 3px;
+  }
+  .scrubber-fill {
+    position: absolute;
+    inset: 0;
+    width: 38%;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  .scrubber-seg {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 13px;
+    background: var(--border-strong);
+  }
+  .scrubber-marks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.66rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+</style>

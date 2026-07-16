@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { date, location, gear, duration, formats } = project.data;
+const dateLabel = date.toISOString().slice(0, 10);
+---
+
+<div class="spec-strip mono">
+  <div class="spec-cell"><span class="k">Date</span><span class="v">{dateLabel}</span></div>
+  <div class="spec-cell"><span class="k">Location</span><span class="v">{location}</span></div>
+  <div class="spec-cell"><span class="k">Gear</span><span class="v">{gear}</span></div>
+  {duration && (
+    <div class="spec-cell"><span class="k">Duration</span><span class="v">{duration}</span></div>
+  )}
+  <div class="spec-cell"><span class="k">Formats</span><span class="v">{formats}</span></div>
+</div>
+
+<style>
+  .spec-strip {
+    display: flex;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+  }
+  .spec-cell {
+    padding: 14px 18px;
+    border-right: 1px solid var(--border);
+    flex: 1 1 140px;
+  }
+  .spec-cell:last-child { border-right: none; }
+  .spec-cell .k {
+    display: block;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+  }
+  .spec-cell .v { color: var(--text); }
+</style>
