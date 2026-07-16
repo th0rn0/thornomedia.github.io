@@ -1,12 +1,10 @@
 ---
-import { Image } from 'astro:assets';
-import logo from '../assets/logo-white.png';
 ---
 
 <footer id="contact">
   <div class="wrap foot-row">
     <div>
-      <Image class="logotype" src={logo} alt="thorno.media" height={20} />
+      <div class="logotype">THORNO<span class="dot">.</span>MEDIA</div>
       <p class="foot-note">Based in the UK — available worldwide.</p>
     </div>
     <div class="foot-links">
@@ -33,10 +31,12 @@ import logo from '../assets/logo-white.png';
     gap: 24px;
   }
   .logotype {
-    display: block;
-    height: 20px;
-    width: auto;
+    font-family: 'Archivo Exp', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
   }
+  .logotype .dot { color: var(--accent); }
   .foot-note {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
