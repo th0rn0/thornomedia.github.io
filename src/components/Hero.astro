@@ -137,7 +137,14 @@ const crossfadeKeyframes = videos
   }
   @media (prefers-reduced-motion: reduce) {
     .hero .hero-bg--animated { animation: none; opacity: 0; }
-    .hero .hero-bg--animated:first-child { opacity: 1; }
+    /* :first-of-type, not :first-child — the injected <style> tag for the
+       crossfade keyframes renders as a literal preceding sibling of the
+       videos, so :first-child never matches any of them and the hero goes
+       fully blank under reduced motion. :first-of-type only counts <video>
+       siblings, so it's immune to that. Confirmed the hard way: a plain
+       screenshot under a forced prefers-reduced-motion Chromium session
+       showed a blank hero even though this looked correct on paper. */
+    .hero .hero-bg--animated:first-of-type { opacity: 1; }
   }
   .hero-scrim {
     position: absolute;
