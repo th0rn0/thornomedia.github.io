@@ -3,11 +3,6 @@ interface Props {
   eyebrow: string;
   subtitle: string;
   // duration must be each clip's exact trimmed length (ffprobe format=duration).
-  // It sets that clip's own hold time — this is what stops the native video
-  // loop from ever wrapping while the clip is still fully visible. A shared
-  // fixed hold across differently-sized clips is what caused the old
-  // abrupt-cut-and-repeat bug: a short clip would loop 1-2x mid-hold before
-  // its cue to fade out. See DESIGN.md decisions log, 2026-07-24.
   videos: { src: string; poster: string; duration: number }[];
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
@@ -15,27 +10,28 @@ interface Props {
 
 const { eyebrow, subtitle, videos, primaryCta, secondaryCta } = Astro.props;
 
-// Crossfade timing: each clip fades in, holds for (its own duration - FADE),
-// then fades out into the next. Because hold length always matches the clip's
-// real length, the clip plays through exactly once per visible appearance —
-// the native loop only wraps while it's offscreen (opacity 0), never mid-hold.
-const FADE = 1.5;
-const slots = videos.map((v) => v.duration);
-const TOTAL = slots.reduce((sum, s) => sum + s, 0);
-const delays = slots.reduce<number[]>((acc, slot, i) => {
-  acc.push(i === 0 ? -FADE : acc[i - 1] + slots[i - 1]);
+// Crossfade timing: no hold — each clip rises to a single peak at its
+// midpoint then immediately falls, so it's always mid-transition into or
+// out of the next clip rather than sitting static at full opacity. Fade
+// speed is tied to the clip's own length (half its duration each way)
+// rather than a shared constant, so the clip plays through its entire
+// length exactly once per appearance with no leftover time to freeze on —
+// same principle as the old hold-based alignment, just with hold=0.
+const fades = videos.map((v) => v.duration / 2);
+const TOTAL = fades.reduce((sum, f) => sum + f, 0);
+const delays = fades.reduce<number[]>((acc, fade, i) => {
+  acc.push(i === 0 ? -fade : acc[i - 1] + fades[i - 1]);
   return acc;
 }, []);
 const pct = (s: number) => ((s / TOTAL) * 100).toFixed(3);
 const crossfadeKeyframes = videos
   .map((v, i) => {
-    const hold = v.duration - FADE;
+    const fade = fades[i];
     return `
   @keyframes crossfade-${i} {
     0% { opacity: 0; }
-    ${pct(FADE)}% { opacity: 1; }
-    ${pct(FADE + hold)}% { opacity: 1; }
-    ${pct(FADE + hold + FADE)}% { opacity: 0; }
+    ${pct(fade)}% { opacity: 1; }
+    ${pct(fade * 2)}% { opacity: 0; }
     100% { opacity: 0; }
   }`;
   })
