@@ -1,21 +1,65 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-
 interface Props {
   eyebrow: string;
   subtitle: string;
-  image: ImageMetadata;
-  imageAlt: string;
+  // duration must be each clip's exact trimmed length (ffprobe format=duration).
+  videos: { src: string; poster: string; duration: number }[];
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
 }
 
-const { eyebrow, subtitle, image, imageAlt, primaryCta, secondaryCta } = Astro.props;
+const { eyebrow, subtitle, videos, primaryCta, secondaryCta } = Astro.props;
+
+// Crossfade timing: no hold — each clip rises to a single peak at its
+// midpoint then immediately falls, so it's always mid-transition into or
+// out of the next clip rather than sitting static at full opacity. Fade
+// speed is tied to the clip's own length (half its duration each way)
+// rather than a shared constant, so the clip plays through its entire
+// length exactly once per appearance with no leftover time to freeze on —
+// same principle as the old hold-based alignment, just with hold=0.
+const fades = videos.map((v) => v.duration / 2);
+const TOTAL = fades.reduce((sum, f) => sum + f, 0);
+const delays = fades.reduce<number[]>((acc, fade, i) => {
+  acc.push(i === 0 ? -fade : acc[i - 1] + fades[i - 1]);
+  return acc;
+}, []);
+const pct = (s: number) => ((s / TOTAL) * 100).toFixed(3);
+const crossfadeKeyframes = videos
+  .map((v, i) => {
+    const fade = fades[i];
+    return `
+  @keyframes crossfade-${i} {
+    0% { opacity: 0; }
+    ${pct(fade)}% { opacity: 1; }
+    ${pct(fade * 2)}% { opacity: 0; }
+    100% { opacity: 0; }
+  }`;
+  })
+  .join('\n');
 ---
 
 <header class="hero">
-  <Image class="hero-bg" src={image} alt={imageAlt} widths={[640, 1024, 1600, 1920]} sizes="100vw" priority />
+  {videos.length > 1 && <style set:html={crossfadeKeyframes} />}
+  {
+    videos.map(({ src, poster }, i) => (
+      <video
+        class={videos.length > 1 ? 'hero-bg hero-bg--animated' : 'hero-bg'}
+        src={src}
+        poster={poster}
+        autoplay
+        muted
+        loop={videos.length === 1}
+        playsinline
+        aria-hidden="true"
+        preload={i === 0 ? 'auto' : 'metadata'}
+        style={
+          videos.length > 1
+            ? `animation-name:crossfade-${i}; animation-duration:${TOTAL}s; animation-delay:${delays[i]}s;`
+            : undefined
+        }
+      />
+    ))
+  }
   <div class="hero-scrim"></div>
   <div class="hero-frame"></div>
   <div class="lockon"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
@@ -30,6 +74,44 @@ const { eyebrow, subtitle, image, imageAlt, primaryCta, secondaryCta } = Astro.p
   </div>
 </header>
 
+<script>
+  // prefers-reduced-motion must freeze on the first clip's poster, not just stop
+  // crossfading between clips — CSS alone can hide the others, but only JS can
+  // stop this one's own internal video playback.
+  const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const videos = document.querySelectorAll('.hero-bg--animated');
+  const freeze = () => {
+    if (!mql.matches) return;
+    videos.forEach((video, i) => {
+      video.pause();
+      if (i === 0) video.currentTime = 0;
+    });
+  };
+  freeze();
+  mql.addEventListener('change', freeze);
+
+  // Resync each clip's playback to frame 0 exactly when its own crossfade
+  // cycle restarts (local 0%, i.e. the instant its fade-in begins), instead
+  // of trusting the browser's native <video loop> to independently stay in
+  // phase with the CSS animation. An earlier attempt did this with a JS
+  // setTimeout/setInterval schedule computed from script-execution time —
+  // that still drifted, because inline <script> runs during HTML parsing
+  // (before first paint) while the CSS animation's own clock only starts at
+  // paint, so the two timers had different t=0 references. Using
+  // animationstart/animationiteration instead ties the reset directly to the
+  // browser's own animation clock — the same clock driving opacity — so
+  // there's no separate timer to drift out of phase with it. See DESIGN.md
+  // decisions log, 2026-07-24.
+  videos.forEach((video) => {
+    const resync = () => {
+      video.currentTime = 0;
+      if (video.paused) video.play().catch(() => {});
+    };
+    video.addEventListener('animationstart', resync);
+    video.addEventListener('animationiteration', resync);
+  });
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -41,12 +123,28 @@ const { eyebrow, subtitle, image, imageAlt, primaryCta, secondaryCta } = Astro.p
     overflow: hidden;
     background: #14181a;
   }
-  .hero :global(.hero-bg) {
+  .hero .hero-bg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  .hero .hero-bg--animated {
+    opacity: 0;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero .hero-bg--animated { animation: none; opacity: 0; }
+    /* :first-of-type, not :first-child — the injected <style> tag for the
+       crossfade keyframes renders as a literal preceding sibling of the
+       videos, so :first-child never matches any of them and the hero goes
+       fully blank under reduced motion. :first-of-type only counts <video>
+       siblings, so it's immune to that. Confirmed the hard way: a plain
+       screenshot under a forced prefers-reduced-motion Chromium session
+       showed a blank hero even though this looked correct on paper. */
+    .hero .hero-bg--animated:first-of-type { opacity: 1; }
   }
   .hero-scrim {
     position: absolute;
