@@ -3,18 +3,21 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProjectGrid from '../components/ProjectGrid.astro';
-import heroDiagonal from '../assets/hero/car-chase-diagonal.jpg';
 import heroOverhead from '../assets/hero/car-chase-overhead.jpg';
-import heroTreeTunnel from '../assets/hero/car-chase-tree-tunnel.jpg';
+import heroLanops from '../assets/hero/lanops-tent.jpg';
+import heroBuhurt from '../assets/hero/buhurt-procession.jpg';
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
+// One clip per source video, so the hero represents the full range of work
+// (FPV, event coverage, combat-sport videography) rather than just the
+// strongest single source. See DESIGN.md decisions log, 2026-07-24.
 const heroVideos = [
   { src: '/videos/hero/car-chase-overhead.mp4', poster: heroOverhead.src },
-  { src: '/videos/hero/car-chase-diagonal.mp4', poster: heroDiagonal.src },
-  { src: '/videos/hero/car-chase-tree-tunnel.mp4', poster: heroTreeTunnel.src },
+  { src: '/videos/hero/lanops-tent.mp4', poster: heroLanops.src },
+  { src: '/videos/hero/buhurt-procession.mp4', poster: heroBuhurt.src },
 ];
 ---
 
