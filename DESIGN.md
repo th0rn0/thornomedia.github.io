@@ -57,9 +57,10 @@
 
 ## Motion
 - **Approach:** Intentional, mostly restrained.
-- **Signature moment (the one flourish):** Thin corner brackets on hero imagery animate in like a viewfinder "locking on" on page load (~1.1s, `cubic-bezier(.2,.7,.3,1)`), then go still. This is the only entrance animation in the system, everything else is static by default.
-- **Reduced motion:** `prefers-reduced-motion: reduce` must skip the lock-on animation and show the end state immediately. Verified in the design preview.
-- **No autoplay carousels.** Project pages use a manual scrubber for playback control.
+- **Signature moment (the one flourish):** Thin corner brackets on hero imagery animate in like a viewfinder "locking on" on page load (~1.1s, `cubic-bezier(.2,.7,.3,1)`), then go still. This is the only *entrance* animation in the system, everything else is static by default.
+- **Reduced motion:** `prefers-reduced-motion: reduce` must skip the lock-on animation and show the end state immediately, and freeze the hero crossfade on its first frame. Verified in the design preview.
+- **Hero background exception:** the index hero crossfades slowly between a small set of stills (7.5s/image: 1.5s fade, 6s hold) — see Decisions Log, 2026-07-24. This is a deliberate, explicit-approval exception to "static by default," scoped to the hero only.
+- **No autoplay carousels elsewhere.** Project pages use a manual scrubber for playback control; the hero crossfade is not a carousel in that sense (no controls, no discrete "slides" the user steps through) but it is autoplaying motion, worth flagging in QA if it ever reads as busier than intended.
 - **Easing:** enter `ease-out`, exit `ease-in`, move `ease-in-out`.
 - **Duration:** micro 100ms (hover), short 150–250ms (buttons/links), signature moment ~1100ms (hero lock-on only).
 
@@ -72,3 +73,4 @@
 | 2026-07-16 | Removed decorative grain overlay from design preview | `mix-blend-mode: overlay` on a fixed full-page noise layer crushed contrast badly in dark mode (confirmed via rendered screenshot, not just computed styles). Removed rather than tuned, given the risk of the effect misbehaving in the eventual production build. |
 | 2026-07-16 | Design system approved via HTML preview | User reviewed the local preview file and approved the direction as-is. |
 | 2026-07-16 | Dropped the light theme and toggle, dark-only | User's call after seeing the live site. The aesthetic is a dark, restrained "control room" mood by design, a light variant diluted that and added UI surface for no real benefit. |
+| 2026-07-24 | Hero background crossfades between 3 FPV stills instead of staying static | Explicit user override of the "static by default, lock-on is the only motion" rule in the Motion section. Real footage (FPV car-chase highlights) replaced the synthetic gradient placeholder cover the hero used to pull from the featured project. Slow 7.5s-per-image crossfade (1.5s fade / 6s hold), chosen to stay "quiet" rather than carousel-loud; respects `prefers-reduced-motion` by freezing on the first frame. |
