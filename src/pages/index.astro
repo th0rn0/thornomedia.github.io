@@ -11,10 +11,10 @@ const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const heroImages = [
-  { src: heroOverhead, alt: 'FPV chase, overhead pass down a rural road' },
-  { src: heroDiagonal, alt: 'FPV chase, diagonal line down a hedgerowed road' },
-  { src: heroTreeTunnel, alt: 'FPV chase through a tree-lined tunnel of road' },
+const heroVideos = [
+  { src: '/videos/hero/car-chase-overhead.mp4', poster: heroOverhead.src },
+  { src: '/videos/hero/car-chase-diagonal.mp4', poster: heroDiagonal.src },
+  { src: '/videos/hero/car-chase-tree-tunnel.mp4', poster: heroTreeTunnel.src },
 ];
 ---
 
@@ -22,7 +22,7 @@ const heroImages = [
   <Hero
     eyebrow="PILOT · PHOTOGRAPHER · VIDEOGRAPHER"
     subtitle="Aerial and ground-based work across photography, film, and FPV, flown, framed, and cut by one hand."
-    images={heroImages}
+    videos={heroVideos}
     primaryCta={{ label: 'View the work', href: '#work' }}
     secondaryCta={{ label: 'Get in touch', href: '#contact' }}
   >

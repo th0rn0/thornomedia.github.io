@@ -1,25 +1,22 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-
 interface Props {
   eyebrow: string;
   subtitle: string;
-  images: { src: ImageMetadata; alt: string }[];
+  videos: { src: string; poster: string }[];
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
 }
 
-const { eyebrow, subtitle, images, primaryCta, secondaryCta } = Astro.props;
+const { eyebrow, subtitle, videos, primaryCta, secondaryCta } = Astro.props;
 
-// Crossfade timing: each image holds, then dissolves into the next.
-// Delay is offset by -FADE so the first image is already fully faded in at load
-// (no blank flash on first paint). Keyframe stops are percentages of TOTAL, which
-// depends on images.length, so they're computed here rather than hardcoded.
+// Crossfade timing: each clip holds, then dissolves into the next.
+// HOLD+FADE (SLOT) must match each clip's own trimmed duration exactly — that's
+// what keeps the native video loop-point landing while a clip is invisible
+// (opacity 0) instead of jump-cutting mid-hold. See DESIGN.md decisions log.
 const FADE = 1.5;
 const HOLD = 6;
 const SLOT = FADE + HOLD;
-const TOTAL = images.length * SLOT;
+const TOTAL = videos.length * SLOT;
 const delayFor = (i: number) => i * SLOT - FADE;
 const pct = (s: number) => ((s / TOTAL) * 100).toFixed(3);
 const crossfadeKeyframes = `
@@ -34,19 +31,21 @@ const crossfadeKeyframes = `
 ---
 
 <header class="hero">
-  {images.length > 1 && <style set:html={crossfadeKeyframes} />}
+  {videos.length > 1 && <style set:html={crossfadeKeyframes} />}
   {
-    images.map(({ src, alt }, i) => (
-      <Image
-        class={images.length > 1 ? 'hero-bg hero-bg--animated' : 'hero-bg'}
+    videos.map(({ src, poster }, i) => (
+      <video
+        class={videos.length > 1 ? 'hero-bg hero-bg--animated' : 'hero-bg'}
         src={src}
-        alt={alt}
-        widths={[640, 1024, 1600, 1920]}
-        sizes="100vw"
-        priority={i === 0}
-        loading={i === 0 ? 'eager' : 'lazy'}
+        poster={poster}
+        autoplay
+        muted
+        loop
+        playsinline
+        aria-hidden="true"
+        preload={i === 0 ? 'auto' : 'metadata'}
         style={
-          images.length > 1
+          videos.length > 1
             ? `animation-duration:${TOTAL}s; animation-delay:${delayFor(i)}s;`
             : undefined
         }
@@ -67,6 +66,22 @@ const crossfadeKeyframes = `
   </div>
 </header>
 
+<script>
+  // prefers-reduced-motion must freeze on the first clip's poster, not just stop
+  // crossfading between clips — CSS alone can hide the others, but only JS can
+  // stop this one's own internal video playback.
+  const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const freeze = () => {
+    if (!mql.matches) return;
+    document.querySelectorAll<HTMLVideoElement>('.hero-bg--animated').forEach((video, i) => {
+      video.pause();
+      if (i === 0) video.currentTime = 0;
+    });
+  };
+  freeze();
+  mql.addEventListener('change', freeze);
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -78,22 +93,22 @@ const crossfadeKeyframes = `
     overflow: hidden;
     background: #14181a;
   }
-  .hero :global(.hero-bg) {
+  .hero .hero-bg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  .hero :global(.hero-bg--animated) {
+  .hero .hero-bg--animated {
     opacity: 0;
     animation-name: crossfade;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero :global(.hero-bg--animated) { animation: none; opacity: 0; }
-    .hero :global(.hero-bg--animated:first-child) { opacity: 1; }
+    .hero .hero-bg--animated { animation: none; opacity: 0; }
+    .hero .hero-bg--animated:first-child { opacity: 1; }
   }
   .hero-scrim {
     position: absolute;
