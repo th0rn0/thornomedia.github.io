@@ -52,7 +52,7 @@ const crossfadeKeyframes = videos
         poster={poster}
         autoplay
         muted
-        loop
+        loop={videos.length === 1}
         playsinline
         aria-hidden="true"
         preload={i === 0 ? 'auto' : 'metadata'}
@@ -83,15 +83,37 @@ const crossfadeKeyframes = videos
   // crossfading between clips — CSS alone can hide the others, but only JS can
   // stop this one's own internal video playback.
   const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const videos = document.querySelectorAll('.hero-bg--animated');
   const freeze = () => {
     if (!mql.matches) return;
-    document.querySelectorAll<HTMLVideoElement>('.hero-bg--animated').forEach((video, i) => {
+    videos.forEach((video, i) => {
       video.pause();
       if (i === 0) video.currentTime = 0;
     });
   };
   freeze();
   mql.addEventListener('change', freeze);
+
+  // Resync each clip's playback to frame 0 exactly when its own crossfade
+  // cycle restarts (local 0%, i.e. the instant its fade-in begins), instead
+  // of trusting the browser's native <video loop> to independently stay in
+  // phase with the CSS animation. An earlier attempt did this with a JS
+  // setTimeout/setInterval schedule computed from script-execution time —
+  // that still drifted, because inline <script> runs during HTML parsing
+  // (before first paint) while the CSS animation's own clock only starts at
+  // paint, so the two timers had different t=0 references. Using
+  // animationstart/animationiteration instead ties the reset directly to the
+  // browser's own animation clock — the same clock driving opacity — so
+  // there's no separate timer to drift out of phase with it. See DESIGN.md
+  // decisions log, 2026-07-24.
+  videos.forEach((video) => {
+    const resync = () => {
+      video.currentTime = 0;
+      if (video.paused) video.play().catch(() => {});
+    };
+    video.addEventListener('animationstart', resync);
+    video.addEventListener('animationiteration', resync);
+  });
 </script>
 
 <style>
