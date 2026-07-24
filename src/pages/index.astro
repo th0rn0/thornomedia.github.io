@@ -10,7 +10,6 @@ import heroLanopsTent from '../assets/hero/lanops-tent.jpg';
 import heroLanopsHall from '../assets/hero/lanops-hall.jpg';
 import heroLanopsDoorway from '../assets/hero/lanops-doorway.jpg';
 import heroBuhurtProcession from '../assets/hero/buhurt-procession.jpg';
-import heroBuhurtSky from '../assets/hero/buhurt-sky.jpg';
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -28,7 +27,6 @@ const heroVideos = [
   { src: '/videos/hero/buhurt-procession.mp4', poster: heroBuhurtProcession.src, duration: 5.0 },
   { src: '/videos/hero/lanops-hall.mp4', poster: heroLanopsHall.src, duration: 2.5025 },
   { src: '/videos/hero/car-chase-tree-tunnel.mp4', poster: heroTreeTunnel.src, duration: 7.5075 },
-  { src: '/videos/hero/buhurt-sky.mp4', poster: heroBuhurtSky.src, duration: 4.0 },
   { src: '/videos/hero/lanops-doorway.mp4', poster: heroLanopsDoorway.src, duration: 1.985317 },
 ];
 ---
